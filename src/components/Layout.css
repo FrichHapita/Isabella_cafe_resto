@@ -1,0 +1,29 @@
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Fix flexbox overflow */
+  transition: var(--transition);
+}
+
+.page-wrapper {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .page-wrapper {
+    padding: 16px;
+  }
+}
