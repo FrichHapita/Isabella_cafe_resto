@@ -12,7 +12,7 @@ const Discounts = () => {
     type: 'percentage', // percentage or fixed
     value: '',
     isWholeOrder: true, // true: apply to whole order, false: apply to specific items
-    itemIds: [] 
+    itemIds: []
   });
 
   const handleOpenModal = (discount = null) => {
@@ -49,7 +49,7 @@ const Discounts = () => {
   const toggleItemSelection = (id) => {
     setFormData(prev => ({
       ...prev,
-      itemIds: prev.itemIds.includes(id) 
+      itemIds: prev.itemIds.includes(id)
         ? prev.itemIds.filter(i => i !== id)
         : [...prev.itemIds, id]
     }));
@@ -97,7 +97,7 @@ const Discounts = () => {
                     {discount.type === 'percentage' ? `${discount.value}%` : `₱${discount.value}`}
                   </td>
                   <td>
-                    {discount.isWholeOrder ? 'Whole Order' : 
+                    {discount.isWholeOrder ? 'Whole Order' :
                       `${discount.itemIds?.length || 0} Specific Items`
                     }
                   </td>
@@ -165,7 +165,7 @@ const Discounts = () => {
                   onChange={e => setFormData({ ...formData, isWholeOrder: e.target.value === 'true' })}
                 >
                   <option value="true">Whole Order</option>
-                  <option value="false">Specific Items Only</option>
+                  {/* <option value="false">Specific Items Only</option> */}
                 </select>
               </div>
 
@@ -175,8 +175,8 @@ const Discounts = () => {
                   <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {items.map(item => (
                       <label key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={formData.itemIds.includes(item.id)}
                           onChange={() => toggleItemSelection(item.id)}
                         />
