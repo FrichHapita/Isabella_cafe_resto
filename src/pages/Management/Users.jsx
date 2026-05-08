@@ -1,17 +1,47 @@
 import React, { useState } from 'react';
-import { UserPlus, Shield, UserCircle } from 'lucide-react';
+import { UserPlus, Shield, UserCircle, Edit2, Trash2, X } from 'lucide-react';
 import useStore from '../../store/useStore';
 
 const Users = () => {
-  const { users, branches, roles, addUser } = useStore();
-  const [showAdd, setShowAdd] = useState(false);
+  const { users, branches, roles, addUser, updateUser, deleteUser, showDialog } = useStore();
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', role: 'Cashier', branchId: branches[0]?.id || '' });
+
+  const handleOpenModal = (user = null) => {
+    if (user) {
+      setEditingId(user.id);
+      setFormData({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        branchId: user.branchId
+      });
+    } else {
+      setEditingId(null);
+      setFormData({ name: '', email: '', role: 'Cashier', branchId: branches[0]?.id || '' });
+    }
+    setShowModal(true);
+  };
+
+  const handleDelete = (id) => {
+    showDialog({
+      type: 'confirm',
+      title: 'Delete User',
+      message: 'Are you sure you want to delete this user? This cannot be undone.',
+      confirmText: 'Delete',
+      onConfirm: () => deleteUser(id)
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addUser(formData);
-    setShowAdd(false);
-    setFormData({ name: '', email: '', role: 'Cashier', branchId: branches[0]?.id || '' });
+    if (editingId) {
+      updateUser({ ...formData, id: editingId });
+    } else {
+      addUser(formData);
+    }
+    setShowModal(false);
   };
 
   return (
@@ -21,7 +51,7 @@ const Users = () => {
           <h1 className="page-title">User Management</h1>
           <p className="page-subtitle">Assign roles and branch access to staff</p>
         </div>
-        <button className="primary-btn" onClick={() => setShowAdd(true)}>
+        <button className="primary-btn" onClick={() => handleOpenModal()}>
           <UserPlus size={18} /> Add User
         </button>
       </div>
@@ -35,6 +65,7 @@ const Users = () => {
               <th>Role</th>
               <th>Assigned Branch</th>
               <th>Status</th>
+              <th className="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -49,18 +80,25 @@ const Users = () => {
                 <td>{user.email}</td>
                 <td><span className={`badge ${user.role === 'Admin' ? 'info' : 'success'}`}>{user.role}</span></td>
                 <td>{user.branchId === 'all' ? 'All Branches' : branches.find(b => b.id === user.branchId)?.name}</td>
-                <td><span className="badge success">Active</span></td>
+                <td><span className="status-badge status-active">Active</span></td>
+                <td>
+                  <div className="row-actions justify-end">
+                    <button className="icon-btn-sm" onClick={() => handleOpenModal(user)}><Edit2 size={18} /></button>
+                    <button className="icon-btn-sm delete" onClick={() => handleDelete(user.id)}><Trash2 size={18} /></button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {showAdd && (
+      {showModal && (
         <div className="modal-overlay">
           <div className="modal-content premium-card">
             <div className="modal-header">
-              <h3>Create User Account</h3>
+              <h3>{editingId ? 'Edit User Account' : 'Create User Account'}</h3>
+              <button className="btn-icon" onClick={() => setShowModal(false)}><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body p-24">
@@ -87,8 +125,8 @@ const Users = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="cancel-btn" onClick={() => setShowAdd(false)}>Cancel</button>
-                <button type="submit" className="confirm-btn">Create User</button>
+                <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" className="confirm-btn">{editingId ? 'Save Changes' : 'Create User'}</button>
               </div>
             </form>
           </div>

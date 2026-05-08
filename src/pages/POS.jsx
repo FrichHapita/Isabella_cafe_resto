@@ -69,6 +69,17 @@ const POS = () => {
       discountAmount = activeDiscount.type === 'percentage' 
         ? subtotal * (activeDiscount.value / 100) 
         : activeDiscount.value;
+    } else if (activeDiscount.itemIds && activeDiscount.itemIds.length > 0) {
+      const eligibleSubtotal = cart.reduce((acc, item) => {
+        if (activeDiscount.itemIds.includes(item.id)) {
+          return acc + (item.sellingPrice * item.quantity);
+        }
+        return acc;
+      }, 0);
+      
+      discountAmount = activeDiscount.type === 'percentage'
+        ? eligibleSubtotal * (activeDiscount.value / 100)
+        : Math.min(eligibleSubtotal, activeDiscount.value);
     }
   }
 
@@ -212,7 +223,7 @@ const POS = () => {
               onChange={(e) => setSelectedDiscountId(e.target.value)}
             >
               <option value="">None</option>
-              {discounts.filter(d => d.isWholeOrder).map(d => (
+              {discounts.map(d => (
                 <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </select>

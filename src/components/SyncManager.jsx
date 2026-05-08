@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Cloud, DownloadCloud, UploadCloud, X, Loader2 } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import useStore from '../store/useStore';
 import { syncToFirestore } from '../store/sync';
@@ -51,16 +51,36 @@ const SyncManager = () => {
   const handlePushToCloud = async () => {
     try {
       setLoading(true);
-      setSyncStatus('Pushing local data to cloud...');
+      setSyncStatus('Preparing data push...');
       
-      // We will loop through local state and push everything to firestore
+      let batch = writeBatch(db);
+      let operationCount = 0;
+      let totalPushed = 0;
+
+      // We will loop through local state and push everything to firestore using batches
       for (const collName of COLLECTIONS) {
         const localData = store[collName];
         if (localData && localData.length > 0) {
           for (const item of localData) {
-            await syncToFirestore(collName, item);
+            const docRef = doc(db, collName, item.id);
+            batch.set(docRef, item, { merge: true });
+            operationCount++;
+            
+            // Firestore batches can handle up to 500 operations. We chunk at 450.
+            if (operationCount >= 450) {
+              setSyncStatus(`Pushing local data... (${totalPushed + operationCount} items)`);
+              await batch.commit();
+              totalPushed += operationCount;
+              batch = writeBatch(db);
+              operationCount = 0;
+            }
           }
         }
+      }
+      
+      if (operationCount > 0) {
+        setSyncStatus(`Finalizing push...`);
+        await batch.commit();
       }
       
       store.showDialog({ 

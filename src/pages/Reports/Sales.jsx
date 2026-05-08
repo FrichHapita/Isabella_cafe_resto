@@ -84,16 +84,16 @@ const Sales = () => {
                   <td><strong>{sale.id}</strong></td>
                   <td>{new Date(sale.date).toLocaleString()}</td>
                   <td>{branches.find(b => b.id === sale.branchId)?.name}</td>
-                  <td><span className="badge info">{sale.paymentMethod}</span></td>
+                  <td><span className="status-badge status-info">{sale.paymentMethod}</span></td>
                   <td>{sale.items.length} items</td>
                   <td className="font-bold">
                     {sale.status === 'VOIDED' ? <span className="text-muted line-through">₱{sale.total.toLocaleString()}</span> : `₱${sale.total.toLocaleString()}`}
                   </td>
                   <td>
                     {sale.status === 'VOIDED' ? (
-                      <span className="badge error">Voided</span>
+                      <span className="status-badge status-error">Voided</span>
                     ) : (
-                      <span className="badge success">Completed</span>
+                      <span className="status-badge status-success">Completed</span>
                     )}
                   </td>
                   <td>

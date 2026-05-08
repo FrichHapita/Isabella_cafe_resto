@@ -218,6 +218,26 @@ const useStore = create(
         get().logAudit('CREATE', 'User', `Added user ${data.name}`);
       },
 
+      updateUser: (updatedUser) => {
+        syncToFirestore('users', updatedUser);
+        get().logAudit('UPDATE', 'User', `Updated user ${updatedUser.name}`);
+      },
+
+      deleteUser: (id) => {
+        const state = get();
+        if (state.currentUser.id === id) {
+          get().showDialog({
+            type: 'error',
+            title: 'Action Blocked',
+            message: 'You cannot delete your own active account.'
+          });
+          return;
+        }
+        const user = state.users.find(u => u.id === id);
+        removeFromFirestore('users', id);
+        get().logAudit('DELETE', 'User', `Deleted user ${user?.name || id}`);
+      },
+
       addSupplier: (supplier) => {
         const data = { ...supplier, id: 's' + Date.now() };
         syncToFirestore('suppliers', data);

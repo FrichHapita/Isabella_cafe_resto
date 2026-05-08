@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, X, Percent, DollarSign } from 'lucide-react';
 import useStore from '../../store/useStore';
 
 const Discounts = () => {
-  const { discounts, addDiscount, updateDiscount, deleteDiscount } = useStore();
+  const { discounts, items, addDiscount, updateDiscount, deleteDiscount } = useStore();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -11,7 +11,8 @@ const Discounts = () => {
     name: '',
     type: 'percentage', // percentage or fixed
     value: '',
-    isWholeOrder: true // true: apply to whole order, false: apply to specific items
+    isWholeOrder: true, // true: apply to whole order, false: apply to specific items
+    itemIds: [] 
   });
 
   const handleOpenModal = (discount = null) => {
@@ -21,11 +22,12 @@ const Discounts = () => {
         name: discount.name,
         type: discount.type,
         value: discount.value,
-        isWholeOrder: discount.isWholeOrder
+        isWholeOrder: discount.isWholeOrder,
+        itemIds: discount.itemIds || []
       });
     } else {
       setEditingId(null);
-      setFormData({ name: '', type: 'percentage', value: '', isWholeOrder: true });
+      setFormData({ name: '', type: 'percentage', value: '', isWholeOrder: true, itemIds: [] });
     }
     setShowModal(true);
   };
@@ -42,6 +44,15 @@ const Discounts = () => {
       addDiscount(data);
     }
     setShowModal(false);
+  };
+
+  const toggleItemSelection = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      itemIds: prev.itemIds.includes(id) 
+        ? prev.itemIds.filter(i => i !== id)
+        : [...prev.itemIds, id]
+    }));
   };
 
   return (
@@ -85,7 +96,11 @@ const Discounts = () => {
                   <td className="font-bold">
                     {discount.type === 'percentage' ? `${discount.value}%` : `₱${discount.value}`}
                   </td>
-                  <td>{discount.isWholeOrder ? 'Whole Order' : 'Specific Items'}</td>
+                  <td>
+                    {discount.isWholeOrder ? 'Whole Order' : 
+                      `${discount.itemIds?.length || 0} Specific Items`
+                    }
+                  </td>
                   <td>
                     <div className="row-actions">
                       <button className="icon-btn-sm" onClick={() => handleOpenModal(discount)}><Edit2 size={18} /></button>
@@ -153,6 +168,26 @@ const Discounts = () => {
                   <option value="false">Specific Items Only</option>
                 </select>
               </div>
+
+              {!formData.isWholeOrder && (
+                <div className="form-group">
+                  <label>Select Items to Discount</label>
+                  <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {items.map(item => (
+                      <label key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={formData.itemIds.includes(item.id)}
+                          onChange={() => toggleItemSelection(item.id)}
+                        />
+                        {item.name} <span className="text-muted">({item.category})</span>
+                      </label>
+                    ))}
+                    {items.length === 0 && <span className="text-muted">No items available.</span>}
+                  </div>
+                </div>
+              )}
+
               <div className="modal-footer">
                 <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
                 <button type="submit" className="confirm-btn">{editingId ? 'Save Changes' : 'Add Discount'}</button>
