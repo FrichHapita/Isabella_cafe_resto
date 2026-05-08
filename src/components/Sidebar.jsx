@@ -15,7 +15,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Coffee,
-  History
+  History,
+  Percent,
+  List
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -47,12 +49,14 @@ const Sidebar = ({ isOpen, setOpen }) => {
         { name: 'Suppliers', path: '/management/suppliers', icon: Truck },
         { name: 'Branches', path: '/management/branches', icon: MapPin },
         { name: 'User Management', path: '/management/users', icon: UserCircle },
+        { name: 'Discounts', path: '/management/discounts', icon: Percent },
       ]
     },
     {
       title: 'Reports',
       items: [
         { name: 'Sales Report', path: '/reports/sales', icon: FileBarChart },
+        { name: 'Audit Logs', path: '/reports/audit', icon: List },
       ]
     }
   ];

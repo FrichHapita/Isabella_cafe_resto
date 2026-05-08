@@ -3,7 +3,7 @@ import { Plus, Search, Edit2, Trash2, Coffee, Image as ImageIcon, Upload } from 
 import useStore from '../../store/useStore';
 
 const Items = () => {
-  const { items, rawMaterials, addItem, updateItem, deleteItem } = useStore();
+  const { items, rawMaterials, addItem, updateItem, deleteItem, showDialog } = useStore();
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,9 +27,13 @@ const Items = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      deleteItem(id);
-    }
+    showDialog({
+      type: 'confirm',
+      title: 'Delete Item',
+      message: 'Are you sure you want to delete this item?',
+      confirmText: 'Delete',
+      onConfirm: () => deleteItem(id)
+    });
   };
 
   const handleAddNew = () => {

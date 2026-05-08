@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, Bell, Search, Globe, ChevronDown } from 'lucide-react';
 import useStore from '../store/useStore';
+import SyncManager from './SyncManager';
 import './Topbar.css';
 
 const Topbar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -22,6 +23,7 @@ const Topbar = ({ sidebarOpen, setSidebarOpen }) => {
       </div>
 
       <div className="topbar-right">
+        <SyncManager />
         {currentUser.role === 'Admin' && (
           <div className="branch-selector">
             <Globe size={18} className="branch-icon" />

@@ -4,7 +4,7 @@ import useStore from '../../store/useStore';
 import './Inventory.css';
 
 const ReceiveItems = () => {
-  const { rawMaterials, branches, suppliers, addStock, activeBranchId, currentUser } = useStore();
+  const { rawMaterials, branches, suppliers, addStock, activeBranchId, currentUser, showDialog } = useStore();
   const [formData, setFormData] = useState({
     itemId: '',
     branchId: currentUser.role === 'Admin' ? (activeBranchId === 'all' ? branches[0].id : activeBranchId) : currentUser.branchId,
@@ -17,7 +17,11 @@ const ReceiveItems = () => {
     if (!formData.itemId || formData.qty <= 0) return;
     
     addStock(formData);
-    alert('Stock received successfully!');
+    showDialog({
+      type: 'success',
+      title: 'Success',
+      message: 'Stock received successfully!'
+    });
     setFormData({ ...formData, qty: 0, note: '' });
   };
 

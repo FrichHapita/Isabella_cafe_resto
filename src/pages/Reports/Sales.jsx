@@ -1,24 +1,36 @@
 import React from 'react';
-import { FileText, Download, TrendingUp } from 'lucide-react';
+import { FileText, Download, TrendingUp, Ban } from 'lucide-react';
 import useStore from '../../store/useStore';
 
 const Sales = () => {
-  const { sales, branches, activeBranchId } = useStore();
+  const { sales, branches, activeBranchId, voidSale, currentUser, showDialog } = useStore();
 
   const filteredSales = activeBranchId === 'all'
     ? sales
     : sales.filter(s => s.branchId === activeBranchId);
 
-  const totalRevenue = filteredSales.reduce((acc, s) => acc + s.subtotal, 0);
-  const totalTax = filteredSales.reduce((acc, s) => acc + s.tax, 0);
+  const validSales = filteredSales.filter(s => s.status !== 'VOIDED');
+
+  const totalRevenue = validSales.reduce((acc, s) => acc + s.subtotal, 0);
+  const totalTax = validSales.reduce((acc, s) => acc + s.tax, 0);
 
   // Calculate COGS (Cost of Goods Sold)
-  const totalCost = filteredSales.reduce((acc, sale) => {
+  const totalCost = validSales.reduce((acc, sale) => {
     const saleCost = sale.items.reduce((sum, item) => sum + ((item.costPrice || 0) * item.quantity), 0);
     return acc + saleCost;
   }, 0);
 
   const netProfit = totalRevenue - totalCost;
+
+  const handleVoid = (saleId) => {
+    showDialog({
+      type: 'confirm',
+      title: 'Void Sale',
+      message: 'Are you sure you want to void this sale? This action will reverse the inventory deduction.',
+      confirmText: 'Yes, Void Sale',
+      onConfirm: () => voidSale(saleId)
+    });
+  };
 
   return (
     <div className="inventory-page">
@@ -61,6 +73,8 @@ const Sales = () => {
               <th>Payment</th>
               <th>Items</th>
               <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -72,7 +86,27 @@ const Sales = () => {
                   <td>{branches.find(b => b.id === sale.branchId)?.name}</td>
                   <td><span className="badge info">{sale.paymentMethod}</span></td>
                   <td>{sale.items.length} items</td>
-                  <td className="font-bold">₱{sale.total.toLocaleString()}</td>
+                  <td className="font-bold">
+                    {sale.status === 'VOIDED' ? <span className="text-muted line-through">₱{sale.total.toLocaleString()}</span> : `₱${sale.total.toLocaleString()}`}
+                  </td>
+                  <td>
+                    {sale.status === 'VOIDED' ? (
+                      <span className="badge error">Voided</span>
+                    ) : (
+                      <span className="badge success">Completed</span>
+                    )}
+                  </td>
+                  <td>
+                    {sale.status !== 'VOIDED' && currentUser.role === 'Admin' && (
+                      <button 
+                        className="icon-btn text-red-500 hover:bg-red-50"
+                        title="Void Sale"
+                        onClick={() => handleVoid(sale.id)}
+                      >
+                        <Ban size={18} />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))
             ) : (

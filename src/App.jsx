@@ -12,11 +12,18 @@ import InventoryLogs from './pages/Inventory/InventoryLogs';
 import Suppliers from './pages/Management/Suppliers';
 import Branches from './pages/Management/Branches';
 import Users from './pages/Management/Users';
+import Discounts from './pages/Management/Discounts';
 import Sales from './pages/Reports/Sales';
+import AuditLogs from './pages/Reports/AuditLogs';
+import GlobalDialog from './components/GlobalDialog';
 import useStore from './store/useStore';
+import { useFirestoreSync } from './store/sync';
 
 function App() {
   const { currentUser, activeBranchId, setActiveBranchId } = useStore();
+  
+  // Real-time Cloud Synchronization
+  useFirestoreSync();
 
   // Set default branch if user is branch-specific
   useEffect(() => {
@@ -27,6 +34,7 @@ function App() {
 
   return (
     <Router>
+      <GlobalDialog />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
@@ -40,7 +48,9 @@ function App() {
           <Route path="management/suppliers" element={<Suppliers />} />
           <Route path="management/branches" element={<Branches />} />
           <Route path="management/users" element={<Users />} />
+          <Route path="management/discounts" element={<Discounts />} />
           <Route path="reports/sales" element={<Sales />} />
+          <Route path="reports/audit" element={<AuditLogs />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
